@@ -14,14 +14,16 @@ SECRET_KEY = '$p*av-=xqwkzes6iz!162kle#cn6cs52-oo=^50v&wc_)n67ys'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*', '52.79.131.167', '52.79.131.167:8000']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
+    'order',
     #    'django.contrib.admin',
-    #    'django.contrib.auth',
+    'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -99,9 +101,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ko'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Seoul'
 
 USE_I18N = True
 
@@ -137,3 +139,14 @@ CORS_ALLOW_HEADERS = (
     'x-csrftoken',
     'x-requested-with',
 )
+
+# Channels
+ASGI_APPLICATION = 'realtime.routing.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('52.79.131.167', 6379)],
+        },
+    },
+}
