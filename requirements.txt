@@ -20,6 +20,7 @@ cryptography==2.8
 daphne==2.4.1
 Django==2.1
 django-cors-headers==3.2.1
+django-dynamodb-sessions==0.6
 docutils==0.16
 durationpy==0.5
 future==0.16.0
