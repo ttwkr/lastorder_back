@@ -80,10 +80,10 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
-SESSION_ENGINE = 'dynamodb_sessions.backends.dynamodb'
-DYNAMODB_SESSIONS_AWS_ACCESS_KEY_ID = real_settings.ACCESS_KEY
-DYNAMODB_SESSIONS_AWS_SECRET_ACCESS_KEY = real_settings.SECRET_KEY
-DYNAMODB_SESSIONS_AWS_REGION_NAME : real_settings.REGION_NAME
+# SESSION_ENGINE = 'dynamodb_sessions.backends.dynamodb'
+# DYNAMODB_SESSIONS_AWS_ACCESS_KEY_ID = real_settings.ACCESS_KEY
+# DYNAMODB_SESSIONS_AWS_SECRET_ACCESS_KEY = real_settings.SECRET_KEY
+# DYNAMODB_SESSIONS_AWS_REGION_NAME : real_settings.REGION_NAME
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
