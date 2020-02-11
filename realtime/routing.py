@@ -1,7 +1,7 @@
 import order.routing
 import product.routing
 
-from channels.auth import AuthMiddlewareStack
+from channels.auth    import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
 
 application = ProtocolTypeRouter({
