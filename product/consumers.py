@@ -27,7 +27,7 @@ class ProductConsumer(JsonWebsocketConsumer):
     def handle(event, context):
         layers = channels.layers.get_channel_layer()
         layers.group_send('product_product', {
-            'type': 'product_message',
+            'type': 'order_message',
             'data': event['Records'][0]['dynamodb']['Keys']['Artist']['S']
         })
         return {
@@ -35,7 +35,7 @@ class ProductConsumer(JsonWebsocketConsumer):
             'body': json.dumps('Hello from lambda')
         }
 
-    def product_message(self, event):
+    def order_message(self, event):
         message = event
         channel_layers = channels.layers.get_channel_layer()
         self.send(text_data=json.dumps(message))

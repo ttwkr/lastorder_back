@@ -29,12 +29,13 @@ class OrderConsumer(AsyncWebsocketConsumer):
     # receive message from websocket
     async def receive(self, text_data):
         print("receive text_data : ", text_data)
+        data = json.loads(text_data)
 
         await self.channel_layer.group_send(
             self.order_group_name,
             {
                 'type':'order_message',
-                'message':text_data
+                'message':data
             }
         )
 
