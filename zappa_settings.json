@@ -10,7 +10,7 @@
     "s3_bucket": "zappa-tjjs31ygm",
     "events": [
       {
-        "function": "product.lambdhandle.invokeHander",
+        "function": "product.lambdahandle.invokeHander",
         "event_source": {
           "arn": "arn:aws:dynamodb:ap-northeast-2:345090283979:table/Music/stream/2020-02-04T13:30:07.610",
           "starting_postion": "LATEST",
