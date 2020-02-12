@@ -24,11 +24,21 @@ class ProductConsumer(JsonWebsocketConsumer):
         )
         self.close()
 
+    # lambda handler
+
     def handle(event, context):
         layers = channels.layers.get_channel_layer()
+
+        insert_data = [
+            {
+                'Artist': data['dynamodb']['NewImage']['Artist']['S'],
+                'SongTitle': data['dynamodb']['NewImage']['SongTitle']['S']
+            }
+            for data in event['Records'] if data['eventName'] == 'INSERT']
+
         layers.group_send('product_product', {
             'type': 'order_message',
-            'data': event['Records'][0]['dynamodb']['Keys']['Artist']['S']
+            'data': insert_data
         })
         return {
             'statusCode': 200,
