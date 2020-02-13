@@ -34,7 +34,7 @@ class ProductConsumer(JsonWebsocketConsumer):
                 'product_id': data['dynamodb']['NewImage']['product_id']['N'],
                 'product': data['dynamodb']['NewImage']['product']['S'],
                 'quantity': data['dynamodb']['NewImage']['quantity']['N'],
-                'price': data['dynamodb']['NewImage']['price']['S'],
+                'price': data['dynamodb']['NewImage']['price']['N'],
                 'store': data['dynamodb']['NewImage']['store_name']['S'],
                 'store_lng': data['dynamodb']['NewImage']['longitude']['S'],
                 'store_lat': data['dynamodb']['NewImage']['latitude']['S'],
