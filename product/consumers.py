@@ -31,16 +31,19 @@ class ProductConsumer(JsonWebsocketConsumer):
 
         insert_data = [
             {
-                'product_id': data['dynamodb']['NewImage']['product_id']['S'],
-                'store': data['dynamodb']['NewImage']['store']['S'],
+                'product_id': data['dynamodb']['NewImage']['product_id']['N'],
                 'product': data['dynamodb']['NewImage']['product']['S'],
-                'quanty': data['dynamodb']['NewImage']['quanty']['S'],
+                'quanty': data['dynamodb']['NewImage']['quanty']['N'],
+                'price': data['dynamodb']['NewImage']['price']['S'],
+                'store': data['dynamodb']['NewImage']['store_name']['S'],
+                'store_lng': data['dynamodb']['NewImage']['longitude']['S'],
+                'store_lat': data['dynamodb']['NewImage']['latitude']['S'],
                 'status': data['dynamodb']['NewImage']['status']['S'],
-                'create_at': data['dynamodb']['NewImage']['create_at']['S'],
+                'created_at': data['dynamodb']['NewImage']['created_at']['S'],
             }
             for data in event['Records'] if data['eventName'] == 'INSERT']
 
-        layers.group_send('product_product', {
+        async_to_sync(layers.group_send)('product_product', {
             'type': 'order_message',
             'data': insert_data
         })
