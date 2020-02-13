@@ -31,8 +31,12 @@ class ProductConsumer(JsonWebsocketConsumer):
 
         insert_data = [
             {
-                'Artist': data['dynamodb']['NewImage']['Artist']['S'],
-                'SongTitle': data['dynamodb']['NewImage']['SongTitle']['S']
+                'product_id': data['dynamodb']['NewImage']['product_id']['S'],
+                'store': data['dynamodb']['NewImage']['store']['S'],
+                'product': data['dynamodb']['NewImage']['product']['S'],
+                'quanty': data['dynamodb']['NewImage']['quanty']['S'],
+                'status': data['dynamodb']['NewImage']['status']['S'],
+                'create_at': data['dynamodb']['NewImage']['create_at']['S'],
             }
             for data in event['Records'] if data['eventName'] == 'INSERT']
 
