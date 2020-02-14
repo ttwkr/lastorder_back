@@ -30,8 +30,16 @@ class ProductConsumer(JsonWebsocketConsumer):
         layers = channels.layers.get_channel_layer()
         data = event['Records'][0]
         eventName = data['eventName']
+        status = ''
 
-        if (eventName == 'INSERT') or (eventName == 'MODIFY'):
+        if datadata['dynamodb']['NewImage']['status']['S'] == '1':
+            status = '판매중'
+
+        elif data['dynamodb']['NewImage']['status']['S'] == '2':
+            status = "대기"
+
+        # eventName에 따른 분기
+        if eventName == 'INSERT':
             send_data = {
                 'type': eventName,
                 'product_id': data['dynamodb']['NewImage']['product_id']['N'],
@@ -41,14 +49,27 @@ class ProductConsumer(JsonWebsocketConsumer):
                 'store': data['dynamodb']['NewImage']['store_name']['S'],
                 'store_lng': data['dynamodb']['NewImage']['longitude']['S'],
                 'store_lat': data['dynamodb']['NewImage']['latitude']['S'],
-                'status': data['dynamodb']['NewImage']['status']['S'],
+                'status': status,
                 'created_at': data['dynamodb']['NewImage']['created_at']['S'],
             }
+
         elif eventName == 'REMOVE':
             send_data = {
                 'type': eventName,
                 'product_id': data['dynamodb']['OldImage']['product_id']['N']
             }
+
+        # 전에 있던 데이터와 고친 데이터의 차이점을 찾아서 보낸다.
+        elif eventName == 'MODIFY':
+            newdict = data['dynamodb']['NewImage']
+            olddict = data['dynamodb']['OldImage']
+            diffdict = dict(newdict.items() - olddict.items())
+            datadict = {
+                'type': eventName,
+                'product_id': data['dynamodb']['NewImage']['product_id']['N']
+            }
+
+            send_data = datadict.update(diffdict)
 
         async_to_sync(layers.group_send)('product_product', {
             'type': 'order_message',
