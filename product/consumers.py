@@ -32,14 +32,14 @@ class ProductConsumer(JsonWebsocketConsumer):
         eventName = data['eventName']
         status = ''
 
-        if data['dynamodb']['NewImage']['status']['S'] == '1':
-            status = '판매중'
-
-        elif data['dynamodb']['NewImage']['status']['S'] == '2':
-            status = "대기"
-
         # eventName에 따른 분기
         if eventName == 'INSERT':
+            if data['dynamodb']['NewImage']['status']['S'] == '1':
+                status = '판매중'
+
+            elif data['dynamodb']['NewImage']['status']['S'] == '2':
+                status = "대기"
+
             send_data = {
                 'type': eventName,
                 'product_id': data['dynamodb']['NewImage']['product_id']['N'],
