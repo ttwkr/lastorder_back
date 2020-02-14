@@ -28,9 +28,12 @@ class ProductConsumer(JsonWebsocketConsumer):
 
     def handle(event, context):
         layers = channels.layers.get_channel_layer()
+        data = event['Records'][0]
+        eventName = data['eventName']
 
-        insert_data = [
-            {
+        if (eventName == 'INSERT') or (eventName == 'MODIFY'):
+            send_data = {
+                'type': eventName,
                 'product_id': data['dynamodb']['NewImage']['product_id']['N'],
                 'product': data['dynamodb']['NewImage']['product']['S'],
                 'quantity': data['dynamodb']['NewImage']['quantity']['N'],
@@ -41,11 +44,15 @@ class ProductConsumer(JsonWebsocketConsumer):
                 'status': data['dynamodb']['NewImage']['status']['S'],
                 'created_at': data['dynamodb']['NewImage']['created_at']['S'],
             }
-            for data in event['Records'] if data['eventName'] == 'INSERT']
+        elif eventName == 'REMOVE':
+            send_data = {
+                'type': eventName,
+                'product_id': data['dynamodb']['OldImage']['product_id']['N']
+            }
 
         async_to_sync(layers.group_send)('product_product', {
             'type': 'order_message',
-            'data': insert_data
+            'data': send_data
         })
         return {
             'statusCode': 200,
