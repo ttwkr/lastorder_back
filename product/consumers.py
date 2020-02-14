@@ -32,7 +32,7 @@ class ProductConsumer(JsonWebsocketConsumer):
         eventName = data['eventName']
         status = ''
 
-        if datadata['dynamodb']['NewImage']['status']['S'] == '1':
+        if data['dynamodb']['NewImage']['status']['S'] == '1':
             status = '판매중'
 
         elif data['dynamodb']['NewImage']['status']['S'] == '2':
