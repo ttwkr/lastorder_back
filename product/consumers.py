@@ -68,8 +68,8 @@ class ProductConsumer(JsonWebsocketConsumer):
                 'type': eventName,
                 'product_id': data['dynamodb']['NewImage']['product_id']['N']
             }
-
-            send_data = datadict.update(diffdict)
+            datadict.update(diffdict)
+            send_data = datadict
 
         async_to_sync(layers.group_send)('product_product', {
             'type': 'order_message',
