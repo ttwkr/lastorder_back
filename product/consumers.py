@@ -34,6 +34,9 @@ class ProductConsumer(JsonWebsocketConsumer):
 
         # eventName에 따른 분기
         if eventName == 'INSERT':
+
+            diffkeys = []
+
             if data['dynamodb']['NewImage']['status']['S'] == '1':
                 status = '판매중'
 
@@ -43,7 +46,6 @@ class ProductConsumer(JsonWebsocketConsumer):
                 # 전에 있던 데이터와 고친 데이터의 차이점을 찾아서 보낸다.
             elif eventName == 'MODIFY':
                 diffresult = ''
-                diffkeys = []
 
                 newdict = list(data['dynamodb']['NewImage'].items())
                 olddict = list(data['dynamodb']['OldImage'].items())
