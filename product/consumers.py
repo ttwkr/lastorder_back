@@ -40,6 +40,19 @@ class ProductConsumer(JsonWebsocketConsumer):
             elif data['dynamodb']['NewImage']['status']['S'] == '2':
                 status = "대기"
 
+                # 전에 있던 데이터와 고친 데이터의 차이점을 찾아서 보낸다.
+            elif eventName == 'MODIFY':
+                diffresult = ''
+                diffkeys = []
+
+                newdict = list(data['dynamodb']['NewImage'].items())
+                olddict = list(data['dynamodb']['OldImage'].items())
+
+                for i in range(0, len(newdict)-1):
+                    if newdict[i] != olddict[i]:
+                        diffresult = newdict[i]
+                        diffkeys.append(diffresult[0])
+
             send_data = {
                 'type': eventName,
                 'product_id': data['dynamodb']['NewImage']['product_id']['N'],
@@ -51,6 +64,7 @@ class ProductConsumer(JsonWebsocketConsumer):
                 'store_lat': data['dynamodb']['NewImage']['latitude']['S'],
                 'status': status,
                 'created_at': data['dynamodb']['NewImage']['created_at']['S'],
+                'diffKeys': diffkeys
             }
 
         elif eventName == 'REMOVE':
@@ -58,26 +72,6 @@ class ProductConsumer(JsonWebsocketConsumer):
                 'type': eventName,
                 'product_id': data['dynamodb']['OldImage']['product_id']['N']
             }
-
-        # 전에 있던 데이터와 고친 데이터의 차이점을 찾아서 보낸다.
-        elif eventName == 'MODIFY':
-            diffresult = ''
-            diffdict = {}
-
-            newdict = list(data['dynamodb']['NewImage'].items())
-            olddict = list(data['dynamodb']['OldImage'].items())
-
-            for i in range(0, len(newdict)-1):
-                if newdict[i] != olddict[i]:
-                    diffresult = newdict[i]
-                    diffdict[diffresult[0]] = diffresult[1]
-
-            datadict = {
-                'type': eventName,
-                'product_id': data['dynamodb']['NewImage']['product_id']['N']
-            }
-            datadict.update(diffdict)
-            send_data = datadict
 
         async_to_sync(layers.group_send)('product_product', {
             'type': 'order_message',
