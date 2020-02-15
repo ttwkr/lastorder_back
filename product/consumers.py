@@ -61,9 +61,17 @@ class ProductConsumer(JsonWebsocketConsumer):
 
         # 전에 있던 데이터와 고친 데이터의 차이점을 찾아서 보낸다.
         elif eventName == 'MODIFY':
-            newdict = data['dynamodb']['NewImage']
-            olddict = data['dynamodb']['OldImage']
-            diffdict = dict(newdict.items() - olddict.items())
+            diffresult = ''
+            diffdict = {}
+
+            newdict = list(data['dynamodb']['NewImage'].items())
+            olddict = list(data['dynamodb']['OldImage'].items())
+
+            for i in range(0, len(newdict)-1):
+                if newdict[i] != olddict[i]:
+                    diffresult = newdict[i]
+                    diffdict[diffresult[0]] = diffresult[1]
+
             datadict = {
                 'type': eventName,
                 'product_id': data['dynamodb']['NewImage']['product_id']['N']
