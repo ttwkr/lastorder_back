@@ -1,6 +1,7 @@
 import json
 import boto3
 
+from datetime                     import date
 from boto3.dynamodb.conditions    import Key, Attr
 from asgiref.sync                 import async_to_sync
 from django.core.serializers.json import DjangoJSONEncoder
@@ -32,8 +33,16 @@ class OrderConsumer(AsyncWebsocketConsumer):
         dynamodb = boto3.resource('dynamodb')
         table = dynamodb.Table('lastordr_order')
 
-        order_count = table.scan(FilterExpression=Key('status').eq(201))["Count"]
-        receipt_count = table.scan(FilterExpression=Key('status').eq(210))["Count"]
+        today = date.today().isoformat()  # '2019-11-23'
+        todaylist = table.scan(FilterExpression=Key('created_at').begins_with(today))["Items"]
+
+        order_count = 0
+        receipt_count = 0
+        for el in todaylist:
+            if el["status"] == 201:
+                order_count += 1
+            elif el["status"] == 210:
+                receipt_count += 1
 
         orderStatus = {
             "order" : order_count,
