@@ -31,49 +31,48 @@ class ProductConsumer(JsonWebsocketConsumer):
         data = event['Records'][0]
         eventName = data['eventName']
         status = ''
+        diffkeys = []
 
-        # eventName에 따른 분기
-        if eventName == 'INSERT':
-
-            diffkeys = []
-
+        def statusCode():
             if data['dynamodb']['NewImage']['status']['S'] == '1':
                 status = '판매중'
 
             elif data['dynamodb']['NewImage']['status']['S'] == '2':
                 status = "대기"
 
-                # 전에 있던 데이터와 고친 데이터의 차이점을 찾아서 보낸다.
-            elif eventName == 'MODIFY':
-                diffresult = ''
+        # eventName에 따른 분기
 
-                newdict = list(data['dynamodb']['NewImage'].items())
-                olddict = list(data['dynamodb']['OldImage'].items())
+        # 전에 있던 데이터와 고친 데이터의 차이점을 찾아서 보낸다.
+        if eventName == 'MODIFY':
+            diffresult = ''
 
-                for i in range(0, len(newdict)-1):
-                    if newdict[i] != olddict[i]:
-                        diffresult = newdict[i]
-                        diffkeys.append(diffresult[0])
+            newdict = list(data['dynamodb']['NewImage'].items())
+            olddict = list(data['dynamodb']['OldImage'].items())
 
-            send_data = {
-                'type': eventName,
-                'product_id': data['dynamodb']['NewImage']['product_id']['N'],
-                'product': data['dynamodb']['NewImage']['product']['S'],
-                'quantity': data['dynamodb']['NewImage']['quantity']['N'],
-                'price': data['dynamodb']['NewImage']['price']['N'],
-                'store': data['dynamodb']['NewImage']['store_name']['S'],
-                'store_lng': data['dynamodb']['NewImage']['longitude']['S'],
-                'store_lat': data['dynamodb']['NewImage']['latitude']['S'],
-                'status': status,
-                'created_at': data['dynamodb']['NewImage']['created_at']['S'],
-                'diffKeys': diffkeys
-            }
+            for i in range(0, len(newdict)-1):
+                if newdict[i] != olddict[i]:
+                    diffresult = newdict[i]
+                    diffkeys.append(diffresult[0])
 
         elif eventName == 'REMOVE':
             send_data = {
                 'type': eventName,
                 'product_id': data['dynamodb']['OldImage']['product_id']['N']
             }
+
+        send_data = {
+            'type': eventName,
+            'product_id': data['dynamodb']['NewImage']['product_id']['N'],
+            'product': data['dynamodb']['NewImage']['product']['S'],
+            'quantity': data['dynamodb']['NewImage']['quantity']['N'],
+            'price': data['dynamodb']['NewImage']['price']['N'],
+            'store': data['dynamodb']['NewImage']['store_name']['S'],
+            'store_lng': data['dynamodb']['NewImage']['longitude']['S'],
+            'store_lat': data['dynamodb']['NewImage']['latitude']['S'],
+            'status': statusCode(),
+            'created_at': data['dynamodb']['NewImage']['created_at']['S'],
+            'diffKeys': diffkeys
+        }
 
         async_to_sync(layers.group_send)('product_product', {
             'type': 'order_message',
