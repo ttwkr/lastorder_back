@@ -21,4 +21,4 @@ class Product(View):
         product_list = sorted(products['Items'], key=lambda x: datetime.datetime.strptime(
             x['created_at'], '%Y-%m-%d %H:%M:%S.%f'), reverse=True)
 
-        return JsonResponse({'result': product_list})
+        return JsonResponse({'data': product_list})

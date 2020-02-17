@@ -2,6 +2,7 @@ import channels.layers
 import json
 import boto3
 import datetime
+from boto3.dynamodb.conditions import Key, Attr
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer, JsonWebsocketConsumer
 
