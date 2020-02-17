@@ -7,6 +7,16 @@ from asgiref.sync                 import async_to_sync
 from django.core.serializers.json import DjangoJSONEncoder
 from channels.generic.websocket   import AsyncWebsocketConsumer
 
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, decimal.Decimal):
+            if o % 1 > 0:
+                return float(o)
+            else:
+                return int(o)
+        return super(DecimalEncoder, self).default(o)
+
+
 class OrderConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.order_name = 'order'
@@ -29,16 +39,18 @@ class OrderConsumer(AsyncWebsocketConsumer):
 
     # receive message from websocket
     async def receive(self, text_data):
-        # order status 통계
+
         dynamodb = boto3.resource('dynamodb')
         table = dynamodb.Table('lastordr_order')
 
-        today = date.today().isoformat()  # '2019-11-23'
-        todaylist = table.scan(FilterExpression=Key('created_at').begins_with(today))["Items"]
-
+        today = date.today().isoformat()
+        today_all_data = table.scan(FilterExpression=Key('created_at').begins_with(today))["Items"]
+        
+        # order status 통계
         order_count = 0
         receipt_count = 0
-        for el in todaylist:
+
+        for el in today_all_data:
             if el["status"] == 201:
                 order_count += 1
             elif el["status"] == 210:
@@ -49,13 +61,18 @@ class OrderConsumer(AsyncWebsocketConsumer):
             "receipt" : receipt_count
         }
 
+        # today list(map)
+        todaylist = json.loads(json.dumps(today_all_data, cls=DecimalEncoder))
+
+        # 람다 데이터
         data = json.loads(text_data)
+
         message = {
             "data" : data,
-            "orderStatus" : orderStatus
+            "orderStatus" : orderStatus,
+            "todaydata" : todaylist
         }
 
-        print("message : ", message)
         await self.channel_layer.group_send(
             self.order_group_name,
             {
