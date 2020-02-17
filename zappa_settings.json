@@ -12,7 +12,7 @@
       {
         "function": "product.lambdahandle.invoke_hander",
         "event_source": {
-          "arn": "arn:aws:dynamodb:ap-northeast-2:345090283979:table/realtime_product/stream/2020-02-13T02:36:39.023",
+          "arn": "arn:aws:dynamodb:ap-northeast-2:345090283979:table/realtime_product/stream/2020-02-17T06:01:01.135",
           "starting_postion": "LATEST",
           "batch_size": 50,
           "enabled": true

@@ -1,7 +1,12 @@
 import channels.layers
+import json
+import boto3
+import datetime
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer, JsonWebsocketConsumer
-import json
+
+dynamodb = boto3.resource('dynamodb')
+table = dynamodb.Table('realtime_product')
 
 
 class ProductConsumer(JsonWebsocketConsumer):
@@ -30,10 +35,14 @@ class ProductConsumer(JsonWebsocketConsumer):
         layers = channels.layers.get_channel_layer()
         data = event['Records'][0]
         eventName = data['eventName']
+        today = datetime.date.today().isoformat()
+        status_1_count = 0
+        status_2_count = 0
         send_data = ''
         status = ''
         diffkeys = []
 
+        # 상태코드 변환
         def statusCode():
             if data['dynamodb']['NewImage']['status']['S'] == '1':
                 status = '판매중'
@@ -42,6 +51,16 @@ class ProductConsumer(JsonWebsocketConsumer):
             elif data['dynamodb']['NewImage']['status']['S'] == '2':
                 status = "대기"
                 return status
+
+        # 총갯수, 상태에 따른 갯수 통계
+        today_count = table.scan(
+            FilterExpression=Key('created_at').begins_with(today))
+
+        for el in today_count['Items']:
+            if el["status"] == '1':
+                status_1_count += 1
+            elif el["status"] == '2':
+                status_2_count += 1
 
         # eventName에 따른 분기
         if (eventName == "INSERT") or (eventName == "MODIFY"):
@@ -80,7 +99,10 @@ class ProductConsumer(JsonWebsocketConsumer):
 
         async_to_sync(layers.group_send)('product_product', {
             'type': 'order_message',
-            'data': send_data
+            'data': send_data,
+            'today_count': today_count['Count'],
+            'status_1_count': status_1_count,
+            'status_2_count': status_2_count
         })
         return {
             'statusCode': 200,
