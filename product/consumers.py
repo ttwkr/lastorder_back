@@ -56,12 +56,6 @@ class ProductConsumer(JsonWebsocketConsumer):
                     diffresult = newdict[i]
                     diffkeys.append(diffresult[0])
 
-        elif eventName == 'REMOVE':
-            send_data = {
-                'type': eventName,
-                'product_id': data['dynamodb']['OldImage']['product_id']['N']
-            }
-
         send_data = {
             'type': eventName,
             'product_id': data['dynamodb']['NewImage']['product_id']['N'],
