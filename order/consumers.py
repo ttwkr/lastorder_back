@@ -28,14 +28,30 @@ class OrderConsumer(AsyncWebsocketConsumer):
 
     # receive message from websocket
     async def receive(self, text_data):
-        print("receive text_data : ", text_data)
-        data = json.loads(text_data)
+        # order status 통계
+        dynamodb = boto3.resource('dynamodb')
+        table = dynamodb.Table('lastordr_order')
 
+        order_count = table.scan(FilterExpression=Key('status').eq(201))["Count"]
+        receipt_count = table.scan(FilterExpression=Key('status').eq(210))["Count"]
+
+        orderStatus = {
+            "order" : order_count,
+            "receipt" : receipt_count
+        }
+
+        data = json.loads(text_data)
+        message = {
+            "data" : data,
+            "orderStatus" : orderStatus
+        }
+
+        print("message : ", message)
         await self.channel_layer.group_send(
             self.order_group_name,
             {
-                'type':'order_message',
-                'message':data
+                'type' : 'order_message',
+                'message' : message
             }
         )
 
