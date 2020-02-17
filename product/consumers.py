@@ -30,6 +30,7 @@ class ProductConsumer(JsonWebsocketConsumer):
         layers = channels.layers.get_channel_layer()
         data = event['Records'][0]
         eventName = data['eventName']
+        send_data = ''
         status = ''
         diffkeys = []
 
@@ -43,32 +44,39 @@ class ProductConsumer(JsonWebsocketConsumer):
                 return status
 
         # eventName에 따른 분기
+        if (eventName == "INSERT") or (eventName == "MODIFY"):
 
-        # 전에 있던 데이터와 고친 데이터의 차이점을 찾아서 보낸다.
-        if eventName == 'MODIFY':
-            diffresult = ''
+            # 전에 있던 데이터와 고친 데이터의 차이점을 찾아서 보낸다.
+            if eventName == 'MODIFY':
+                diffresult = ''
 
-            newdict = list(data['dynamodb']['NewImage'].items())
-            olddict = list(data['dynamodb']['OldImage'].items())
+                newdict = list(data['dynamodb']['NewImage'].items())
+                olddict = list(data['dynamodb']['OldImage'].items())
 
-            for i in range(0, len(newdict)):
-                if newdict[i] != olddict[i]:
-                    diffresult = newdict[i]
-                    diffkeys.append(diffresult[0])
+                for i in range(0, len(newdict)):
+                    if newdict[i] != olddict[i]:
+                        diffresult = newdict[i]
+                        diffkeys.append(diffresult[0])
 
-        send_data = {
-            'type': eventName,
-            'product_id': data['dynamodb']['NewImage']['product_id']['N'],
-            'product': data['dynamodb']['NewImage']['product']['S'],
-            'quantity': data['dynamodb']['NewImage']['quantity']['N'],
-            'price': data['dynamodb']['NewImage']['price']['N'],
-            'store': data['dynamodb']['NewImage']['store_name']['S'],
-            'store_lng': data['dynamodb']['NewImage']['longitude']['S'],
-            'store_lat': data['dynamodb']['NewImage']['latitude']['S'],
-            'status': statusCode(),
-            'created_at': data['dynamodb']['NewImage']['created_at']['S'],
-            'diffKeys': diffkeys
-        }
+            send_data = {
+                'type': eventName,
+                'product_id': data['dynamodb']['NewImage']['product_id']['N'],
+                'product': data['dynamodb']['NewImage']['product']['S'],
+                'quantity': data['dynamodb']['NewImage']['quantity']['N'],
+                'price': data['dynamodb']['NewImage']['price']['N'],
+                'store_name': data['dynamodb']['NewImage']['store_name']['S'],
+                'store_lng': data['dynamodb']['NewImage']['longitude']['S'],
+                'store_lat': data['dynamodb']['NewImage']['latitude']['S'],
+                'status': statusCode(),
+                'created_at': data['dynamodb']['NewImage']['created_at']['S'],
+                'diffKeys': diffkeys
+            }
+
+        elif eventName == 'REMOVE':
+            send_data = {
+                'type': eventName,
+                'product_id': data['dynamodb']['OldImage']['product_id']
+            }
 
         async_to_sync(layers.group_send)('product_product', {
             'type': 'order_message',
