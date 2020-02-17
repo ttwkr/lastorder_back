@@ -36,9 +36,11 @@ class ProductConsumer(JsonWebsocketConsumer):
         def statusCode():
             if data['dynamodb']['NewImage']['status']['S'] == '1':
                 status = '판매중'
+                return status
 
             elif data['dynamodb']['NewImage']['status']['S'] == '2':
                 status = "대기"
+                return status
 
         # eventName에 따른 분기
 
@@ -49,7 +51,7 @@ class ProductConsumer(JsonWebsocketConsumer):
             newdict = list(data['dynamodb']['NewImage'].items())
             olddict = list(data['dynamodb']['OldImage'].items())
 
-            for i in range(0, len(newdict)-1):
+            for i in range(0, len(newdict)):
                 if newdict[i] != olddict[i]:
                     diffresult = newdict[i]
                     diffkeys.append(diffresult[0])
