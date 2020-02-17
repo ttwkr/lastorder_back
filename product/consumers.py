@@ -89,7 +89,12 @@ class ProductConsumer(JsonWebsocketConsumer):
                 'store_lat': data['dynamodb']['NewImage']['latitude']['S'],
                 'status': statusCode(),
                 'created_at': data['dynamodb']['NewImage']['created_at']['S'],
-                'diffKeys': diffkeys
+                'diffKeys': diffkeys,
+                'count': {
+                    'today_count': today_count['Count'],
+                    'status_1_count': status_1_count,
+                    'status_2_count': status_2_count
+                }
             }
 
         elif eventName == 'REMOVE':
@@ -101,9 +106,6 @@ class ProductConsumer(JsonWebsocketConsumer):
         async_to_sync(layers.group_send)('product_product', {
             'type': 'order_message',
             'data': send_data,
-            'today_count': today_count['Count'],
-            'status_1_count': status_1_count,
-            'status_2_count': status_2_count
         })
         return {
             'statusCode': 200,
