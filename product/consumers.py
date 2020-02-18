@@ -1,11 +1,10 @@
-from channels.generic.websocket import WebsocketConsumer, JsonWebsocketConsumer
-from asgiref.sync import async_to_sync
-from boto3.dynamodb.conditions import Key, Attr
 import channels.layers
 import json
 import boto3
 import datetime
-import
+from boto3.dynamodb.conditions import Key, Attr
+from asgiref.sync import async_to_sync
+from channels.generic.websocket import WebsocketConsumer, JsonWebsocketConsumer
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('realtime_product')

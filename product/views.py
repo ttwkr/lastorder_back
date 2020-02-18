@@ -43,7 +43,7 @@ class Product(View):
                     'today_count': products['Count'],
                     'status_1_count': status_1_count,
                     'status_2_count': status_2_count
-                }
+                },
                 'location': location
             }
         )
