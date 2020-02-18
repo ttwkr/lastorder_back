@@ -46,23 +46,23 @@ class OrderConsumer(AsyncWebsocketConsumer):
         today = date.today().isoformat()
         today_all_data = table.scan(FilterExpression=Key('created_at').begins_with(today))["Items"]
         
-        # order status 통계
+        # status 통계 & today list(map)
         order_count = 0
         receipt_count = 0
-
-        for el in today_all_data:
-            if el["status"] == 201:
-                order_count += 1
-            elif el["status"] == 210:
-                receipt_count += 1
-
-        orderStatus = {
-            "order" : order_count,
-            "receipt" : receipt_count
+        todaylist_before = {
+            "201" : [],
+            "210" : []
         }
 
-        # today list(map)
-        todaylist = json.loads(json.dumps(today_all_data, cls=DecimalEncoder))
+        for el in today_all_data:
+            if el["status"] == "201":
+                order_count += 1
+                todaylist_before["201"].append(el)
+            elif el["status"] == "210":
+                receipt_count += 1
+                todaylist_before["210"].append(el)
+
+        todayList = json.loads(json.dumps(todaylist_before, cls=DecimalEncoder))
 
         # 람다 데이터
         data = json.loads(text_data)
@@ -70,7 +70,7 @@ class OrderConsumer(AsyncWebsocketConsumer):
         message = {
             "data" : data,
             "orderStatus" : orderStatus,
-            "todaydata" : todaylist
+            "todaydata" : todayList
         }
 
         await self.channel_layer.group_send(
