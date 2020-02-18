@@ -2,11 +2,11 @@ import json
 import boto3
 import decimal
 
-from datetime                     import date
-from boto3.dynamodb.condition     import Key, Attr
-from asgiref.sync                 import async_to_sync
+from datetime import date
+from boto3.dynamodb.conditions import Key, Attr
+from asgiref.sync import async_to_sync
 from django.core.serializers.json import DjangoJSONEncoder
-from channels.generic.websocket   import AsyncWebsocketConsumer
+from channels.generic.websocket import AsyncWebsocketConsumer
 
 
 class DecimalEncoder(json.JSONEncoder):
@@ -45,12 +45,13 @@ class OrderConsumer(AsyncWebsocketConsumer):
 
         today = date.today().isoformat()
 
-        today_all_data = table.scan(FilterExpression=Key('updated_at').begins_with(today))["Items"]
+        today_all_data = table.scan(FilterExpression=Key(
+            'updated_at').begins_with(today))["Items"]
 
         # status 통계 & today list(map)
         order_count = 0
         receipt_count = 0
-        
+
         # 추후 맵에 status에 따른 마커 이미지 변경을 위해 남겨둠
         todaylist_before = {
             "201": [],
