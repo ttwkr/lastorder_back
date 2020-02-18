@@ -44,14 +44,10 @@ class OrderConsumer(AsyncWebsocketConsumer):
         table = dynamodb.Table('realtime_order')
 
         today = date.today().isoformat()
-<<<<<<< HEAD
-        today_all_data = table.scan(FilterExpression=Key(
-            'created_at').begins_with(today))["Items"]
 
-=======
-        today_all_data = table.scan(FilterExpression=Key('updated_at').begins_with(today))["Items"]
-        
->>>>>>> f771de14ae0a3de0ea1b38cf4ce344834fa786fa
+        today_all_data = table.scan(FilterExpression=Key(
+            'updated_at').begins_with(today))["Items"]
+
         # status 통계 & today list(map)
         order_count = 0
         receipt_count = 0
@@ -68,17 +64,13 @@ class OrderConsumer(AsyncWebsocketConsumer):
                 receipt_count += 1
                 todaylist_before["210"].append(el)
 
-<<<<<<< HEAD
-        todayList = json.loads(json.dumps(
-            todaylist_before, cls=DecimalEncoder))
-=======
         orderStatus = {
-            "order" : order_count,
-            "receipt" : receipt_count
+            "order": order_count,
+            "receipt": receipt_count
         }
 
-        todayList = json.loads(json.dumps(todaylist_before, cls=DecimalEncoder))
->>>>>>> f771de14ae0a3de0ea1b38cf4ce344834fa786fa
+        todayList = json.loads(json.dumps(
+            todaylist_before, cls=DecimalEncoder))
 
         # 람다 데이터
         data = json.loads(text_data)
