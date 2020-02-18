@@ -45,7 +45,7 @@ class OrderConsumer(AsyncWebsocketConsumer):
         table = dynamodb.Table('realtime_order')
 
         today = date.today().isoformat()
-        today_all_data = table.scan(FilterExpression=Key('created_at').begins_with(today))["Items"]
+        today_all_data = table.scan(FilterExpression=Key('updated_at').begins_with(today))["Items"]
         
         # status 통계 & today list(map)
         order_count = 0
@@ -62,6 +62,11 @@ class OrderConsumer(AsyncWebsocketConsumer):
             elif el["status"] == "210":
                 receipt_count += 1
                 todaylist_before["210"].append(el)
+
+        orderStatus = {
+            "order" : order_count,
+            "receipt" : receipt_count
+        }
 
         todayList = json.loads(json.dumps(todaylist_before, cls=DecimalEncoder))
 
