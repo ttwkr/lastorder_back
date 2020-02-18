@@ -41,7 +41,7 @@ class OrderConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
 
         dynamodb = boto3.resource('dynamodb')
-        table = dynamodb.Table('lastordr_order')
+        table = dynamodb.Table('realtime_order')
 
         today = date.today().isoformat()
         today_all_data = table.scan(FilterExpression=Key('created_at').begins_with(today))["Items"]
