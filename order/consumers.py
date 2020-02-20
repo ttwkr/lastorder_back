@@ -80,7 +80,7 @@ class OrderConsumer(AsyncWebsocketConsumer):
         message = {
             "data": data,
             "orderStatus": orderStatus,
-            "todaydata": todayList
+            "todaydata": todaylist
         }
 
         await self.channel_layer.group_send(
