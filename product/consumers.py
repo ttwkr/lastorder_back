@@ -36,7 +36,6 @@ class ProductConsumer(JsonWebsocketConsumer):
     def handle(event, context):
         layers = channels.layers.get_channel_layer()
         data = event['Records']
-        eventName = data['eventName']
         today = datetime.date.today().isoformat()
         status_1_count = 0
         status_2_count = 0
@@ -47,12 +46,13 @@ class ProductConsumer(JsonWebsocketConsumer):
 
         # 상태코드 변환
         def statusCode():
-            if data['dynamodb']['NewImage']['status']['S'] == '1':
-                status = '판매중'
-                return status
+            for i in data:
+                if i['dynamodb']['NewImage']['status']['S'] == '1':
+                    status = '판매중'
 
-            elif data['dynamodb']['NewImage']['status']['S'] == '2':
-                status = "대기"
+                elif i['dynamodb']['NewImage']['status']['S'] == '2':
+                    status = "대기"
+
                 return status
 
         # 총갯수, 상태에 따른 갯수 통계
@@ -81,7 +81,7 @@ class ProductConsumer(JsonWebsocketConsumer):
                         diffkeys.append(diffresult[0])
             for i in data:
                 send_data = {
-                    'type': eventName,
+                    'type': i['eventName'],
                     'product_id': i['dynamodb']['NewImage']['product_id']['N'],
                     'product': i['dynamodb']['NewImage']['product']['S'],
                     'quantity': i['dynamodb']['NewImage']['quantity']['N'],
@@ -103,7 +103,7 @@ class ProductConsumer(JsonWebsocketConsumer):
         elif eventName == 'REMOVE':
             for i in data:
                 send_data = {
-                    'type': eventName,
+                    'type': i['eventName'],
                     'product_id': i['dynamodb']['OldImage']['product_id']
                 }
                 result.append(send_data)
