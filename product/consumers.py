@@ -66,20 +66,21 @@ class ProductConsumer(JsonWebsocketConsumer):
                 status_2_count += 1
 
         # eventName에 따른 분기
-        if (eventName == "INSERT") or (eventName == "MODIFY"):
+        for i in data:
+            if (i['eventName'] == "INSERT") or (i['eventName'] == "MODIFY"):
 
-            # 전에 있던 데이터와 고친 데이터의 차이점을 찾아서 보낸다.
-            if eventName == 'MODIFY':
-                diffresult = ''
+                # 전에 있던 데이터와 고친 데이터의 차이점을 찾아서 보낸다.
+                if i['eventName'] == 'MODIFY':
+                    diffresult = ''
 
-                newdict = list(data[0]['dynamodb']['NewImage'].items())
-                olddict = list(data[0]['dynamodb']['OldImage'].items())
+                    newdict = list(data[0]['dynamodb']['NewImage'].items())
+                    olddict = list(data[0]['dynamodb']['OldImage'].items())
 
-                for i in range(0, len(newdict)):
-                    if newdict[i] != olddict[i]:
-                        diffresult = newdict[i]
-                        diffkeys.append(diffresult[0])
-            for i in data:
+                    for i in range(0, len(newdict)):
+                        if newdict[i] != olddict[i]:
+                            diffresult = newdict[i]
+                            diffkeys.append(diffresult[0])
+
                 send_data = {
                     'type': i['eventName'],
                     'product_id': i['dynamodb']['NewImage']['product_id']['N'],
@@ -100,8 +101,7 @@ class ProductConsumer(JsonWebsocketConsumer):
                 }
                 result.append(send_data)
 
-        elif eventName == 'REMOVE':
-            for i in data:
+            elif i['eventName'] == 'REMOVE':
                 send_data = {
                     'type': i['eventName'],
                     'product_id': i['dynamodb']['OldImage']['product_id']
